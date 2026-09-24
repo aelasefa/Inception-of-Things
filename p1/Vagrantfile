@@ -20,23 +20,33 @@ Vagrant.configure("2") do |config|
 
     # K3s server machine.
     config.vm.define "ayelasefS" do |server|
-        server.vm.hostname = "ayelasefS"
-        server.vm.network "private_network",
-            ip: "192.168.56.110"
+      server.vm.hostname = "ayelasefS"
+      server.vm.network "private_network",
+        ip: "192.168.56.110"
 
-        server.vm.provider "libvirt" do |libvirt|
-            libvirt.nvram = "/var/lib/libvirt/qemu/nvram/p1_ayelasefS_VARS.fd"
-        end
+      server.vm.provider "libvirt" do |libvirt|
+        libvirt.nvram = "/var/lib/libvirt/qemu/nvram/p1_ayelasefS_VARS.fd"
+      end
+
+      server.vm.provision "shell",
+        path: "scripts/server.sh",
+        privileged: true
     end
-
     # K3s worker machine.
     config.vm.define "ayelasefSW" do |worker|
-        worker.vm.hostname = "ayelasefSW"
-        worker.vm.network "private_network",
-            ip: "192.168.56.111"
+      worker.vm.hostname = "ayelasefSW"
+      worker.vm.network "private_network",
+        ip: "192.168.56.111"
 
-        worker.vm.provider "libvirt" do |libvirt|
-            libvirt.nvram = "/var/lib/libvirt/qemu/nvram/p1_ayelasefSW_VARS.fd"
-        end
+      worker.vm.provider "libvirt" do |libvirt|
+        libvirt.nvram = "/var/lib/libvirt/qemu/nvram/p1_ayelasefSW_VARS.fd"
+      end
+      worker.vm.provision "file",
+        source: ".vagrant/k3s-node-token",
+        destination: "/home/vagrant/k3s-node-token"
+
+      worker.vm.provision "shell",
+        path: "scripts/worker.sh",
+        privileged: true
     end
 end
